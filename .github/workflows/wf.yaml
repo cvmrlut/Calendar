@@ -1,11 +1,11 @@
-name: Build and Deploy
+name: Build and Deploy Calendar
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   schedule:
-    - cron: '0 16 * * *'
+    # 每1日 00:00 UTC (北京时间08:00) 构建日历
+    - cron: '0 0 1 * *'
   workflow_dispatch:
 
 permissions:
@@ -13,6 +13,7 @@ permissions:
   pages: write
   id-token: write
 
+# 同一时间只允许一个部署流程，新触发时自动取消旧的
 concurrency:
   group: "${{ github.workflow }}-pages"
   cancel-in-progress: true
@@ -54,11 +55,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
     environment:
       name: github-pages
-      url: "${{ steps.deployment.outputs.page_url }}"
-
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
