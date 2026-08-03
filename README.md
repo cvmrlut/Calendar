@@ -17,7 +17,7 @@
 - COMMAND
   ```sh
   npm install tyme4ts #运行依赖
-  npm install -D typescript tsx @types/node #开发依赖
+  npm install -D typescript @types/node #开发依赖
   npm run build #构建
   npx serve dist #本地预览页面 地址 http://localhost:3000
   ```
