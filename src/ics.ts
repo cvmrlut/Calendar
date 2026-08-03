@@ -1,8 +1,4 @@
-/**
-ICS 生成模块
-零第三方依赖，手写 ICS 格式
-时间范围：今年 + 明年 + 后年
-*/
+/** ICS 生成模块 时间单位'年' */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { 
@@ -33,7 +29,7 @@ export async function generateIcs(
   const now = new Date();
   const currentYear = getTimeParts(now, resolvedTz).year;
   const startYear = currentYear;
-  const endYear = currentYear + 2; // 今年+明年+后年
+  const endYear = currentYear + 2; // 今年+未来两年
 
   const lines: string[] = [
     'BEGIN:VCALENDAR',

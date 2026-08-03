@@ -1,11 +1,8 @@
 /**
-tyme4ts 适配层
 接收 main.ts 提供的基础时间上下文
-动态加载 tyme4ts
 生成中国传统历法相关上下文
-注意：
-main.ts 不应 import 本文件
-本文件是唯一允许依赖 tyme4ts 的地方
+动态加载 第三方库
+逐步移除第三方库, 改用自建算法
 */
 import type { BaseTimeContext, TimeParts } from './main.js';
 import { getTimeParts } from './main.js';
@@ -51,8 +48,7 @@ async function loadTyme(): Promise<unknown> {
   } catch (error) {
     throw new Error(
       [
-        '无法加载 tyme4ts',
-        '请先安装依赖：npm install tyme4ts',
+        'Failed to load tyme4ts, Please install the dependency: npm install tyme4ts',
         String(error),
       ].join('\n'),
     );
@@ -72,8 +68,7 @@ function resolveSolarTimeConstructor(tymeModule: unknown): unknown {
   if (!SolarTime) {
     throw new Error(
       [
-        'tyme4ts 中未找到 SolarTime',
-        '请检查当前安装版本的导出方式',
+        'Failed to find SolarTime in tyme4ts, Please check the export of the current version',
       ].join('\n'),
     );
   }
@@ -117,9 +112,9 @@ function createSolarTime(
   }
   throw new Error(
     [
-      '当前 tyme4ts 版本缺少可用的 SolarTime.fromYmdHms 方法',
+      'Failed to create SolarTime instance, Please check the export of the current version of tyme4ts',
       `timeZone: ${timeZone}`,
-      '请根据安装后的实际 API 调整 src/trans.ts',
+      'Please adjust src/trans.ts according to the actual API of the installed version of tyme4ts',
     ].join('\n'),
   );
 }

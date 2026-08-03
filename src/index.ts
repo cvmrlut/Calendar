@@ -1,24 +1,21 @@
-/**
-构建入口
-同时生成 ICS 文件和 GitHub Pages 页面
-*/
+/** 构建入口, 同时生成 ICS 文件和 GitHub Pages 页面 */
 import { generateIcs } from './ics.js';
 import { generatePage } from './page.js';
 
 async function main() {
-  console.log('🚀 开始构建日历...');
+  console.log('🚀 Start building the calendar...');
   console.log(`时区: ${process.env.TZ || 'Asia/Shanghai'}`);
 
   await generateIcs('dist/calendar.ics');
-  console.log('✅ ICS 文件已生成: dist/calendar.ics');
+  console.log('✅ ICS  file has been generated: dist/calendar.ics');
 
   await generatePage('dist/index.html');
-  console.log('✅ HTML 页面已生成: dist/index.html');
+  console.log('✅ HTML page has been generated: dist/index.html');
 
-  console.log('🎉 构建完成！');
+  console.log('🎉 Construction completed!');
 }
 
 main().catch((error) => {
-  console.error('❌ 构建失败:', error);
+  console.error('❌ Construction failed:', error);
   process.exit(1);
 });

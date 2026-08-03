@@ -2,7 +2,6 @@ name: Build and Deploy Calendar
 
 on:
   schedule:
-    # 每1日 00:00 UTC (北京时间08:00) 构建日历
     - cron: '0 0 1 * *'
   push:
     branches:
@@ -20,7 +19,6 @@ permissions:
   pages: write
   id-token: write
 
-# 同一时间只允许一个部署流程，新触发时自动取消旧的
 concurrency:
   group: "${{ github.workflow }}-pages"
   cancel-in-progress: true
