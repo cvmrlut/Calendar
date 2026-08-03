@@ -5,13 +5,14 @@ on:
     # 每1日 00:00 UTC (北京时间08:00) 构建日历
     - cron: '0 0 1 * *'
   push:
-    branches: [main]
-  paths:
-    - 'src/**'
-    - 'package.json'
-    - 'package-lock.json'
-    - 'tsconfig.json'
-    - '.github/workflows/wf.yaml'
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - '.github/workflows/wf.yaml'
   workflow_dispatch:
 
 permissions:
