@@ -2,7 +2,7 @@
 
 >农历-中国传统日历
 
-## Github Actions 自动构建 `calendar.ics`
+## Github Actions 自动构建 https://cvmrlut.github.io/Calendar/calendar.ics
 ## Github Pages 每日信息 https://cvmrlut.github.io/Calendar/
 
 ## ENV

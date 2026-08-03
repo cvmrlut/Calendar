@@ -1,11 +1,17 @@
 name: Build and Deploy Calendar
 
 on:
-  push:
-    branches: [main]
   schedule:
     # 每1日 00:00 UTC (北京时间08:00) 构建日历
     - cron: '0 0 1 * *'
+  push:
+    branches: [main]
+  paths:
+    - 'src/**'
+    - 'package.json'
+    - 'package-lock.json'
+    - 'tsconfig.json'
+    - '.github/workflows/wf.yaml'
   workflow_dispatch:
 
 permissions:
@@ -23,6 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: node:24-slim
+    env:
+      TZ: Asia/Shanghai
 
     steps:
       - name: Prepare container
@@ -37,15 +45,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get npm cache directory
+        id: npm-cache
+        shell: sh
+        run: |
+          echo "dir=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
       - name: Build calendar
         run: npm run build
-        env:
-          TZ: Asia/Shanghai
-          DAYS_BEFORE: '365'
-          DAYS_AFTER: '730'
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
