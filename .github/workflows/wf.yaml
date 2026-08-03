@@ -93,6 +93,7 @@ jobs:
           path: dist
           retention-days: 1
           if-no-files-found: error
+          overwrite: true
 
   deploy:
     needs: build
