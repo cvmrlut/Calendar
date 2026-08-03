@@ -141,22 +141,10 @@ export interface CalendarDayInfo extends BaseTimeContext {
   solarFestivals: string[];
 }
 
-/** 安全调用 tyme4ts 方法 */
-function safeCall(obj: any, methodName: string, defaultValue: any = ''): any {
-  if (obj && typeof obj[methodName] === 'function') {
-    try {
-      return obj[methodName]();
-    } catch {
-      return defaultValue;
-    }
-  }
-  return defaultValue;
-}
-
 /**
 获取单日的完整日历信息
 包括：农历、干支、节气、节日
-已适配 tyme4ts v1.5.x 实际 API
+已精确适配 tyme4ts v1.5.x API
 */
 export async function getCalendarDayInfo(
   base: BaseTimeContext,
@@ -164,48 +152,65 @@ export async function getCalendarDayInfo(
   const tymeCtx = await createTymeTimeContext(base);
   const solarTime = tymeCtx.solarTime as any;
 
-  // ✅ 适配 v1.5.x: 使用 getSolarDay() 获取包含农历信息的日对象
-  let lunarDay: any = null;
-  if (typeof solarTime.getSolarDay === 'function') {
-    lunarDay = solarTime.getSolarDay();
+  // 1. 获取公历日和农历日
+  const solarDay = solarTime.getSolarDay();
+  const lunarDay = solarDay.getLunarDay();
+  
+  // 2. 获取农历月和农历年
+  const lunarMonth = lunarDay.getLunarMonth();
+  const lunarYear = lunarMonth.getLunarYear();
+
+  // 3. 提取干支 (SixtyCycle)
+  // tyme4ts 中干支通过 getYearSixtyCycle / getMonthSixtyCycle / getSixtyCycle 获取
+  const yearGanZhi = lunarDay.getYearSixtyCycle().getName();
+  const monthGanZhi = lunarDay.getMonthSixtyCycle().getName();
+  const dayGanZhi = lunarDay.getSixtyCycle().getName();
+
+  // 4. 提取农历名称
+  const lunarMonthName = lunarMonth.getName();
+  const lunarDayName = lunarDay.getName();
+  
+  // 5. 提取数字年月日
+  const numLunarYear = lunarYear.getYear();
+  // getMonthWithLeap 处理闰月，或者直接 getMonth()
+  const numLunarMonth = typeof lunarMonth.getMonthWithLeap === 'function' 
+    ? lunarMonth.getMonthWithLeap() 
+    : lunarMonth.getMonth();
+  const numLunarDay = lunarDay.getDay();
+
+  // 6. 节气处理 (核心修复)
+  // solarDay.getTerm() 返回的是当前所处的节气（跨度约15天）
+  // 只有当该节气的精确发生日期等于今天时，才将其记为当天的节气
+  let solarTermName = '';
+  const term = solarDay.getTerm();
+  if (term && typeof term.getSolarDay === 'function') {
+    const termExactDay = term.getSolarDay();
+    // 比较两个 SolarDay 是否同一天
+    if (termExactDay.toString() === solarDay.toString()) {
+      solarTermName = term.getName();
+    }
   }
 
-  if (!lunarDay) {
-    const availableMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(solarTime))
-      .filter(name => !name.startsWith('_') && name !== 'constructor');
-    throw new Error(
-      [
-        '无法从 SolarTime 获取 LunarDay',
-        `已尝试的方法: getSolarDay`,
-        `SolarTime 可用方法: ${availableMethods.join(', ')}`,
-        '',
-        '请检查 tyme4ts 版本和 API 文档:',
-        'https://6tail.cn/tyme.html',
-      ].join('\n'),
-    );
-  }
-
-  // ✅ 适配 v1.5.x: 节气方法为 getTerm() 而非 getJieQi()
-  // ✅ 干支方法优先尝试 getDayGanZhi，兜底 getSixtyCycleHour 中的日柱部分
-  const rawTerm = String(safeCall(lunarDay, 'getTerm', ''));
-  const rawDayGanZhi = String(safeCall(lunarDay, 'getDayGanZhi', ''));
+  // 7. 节日处理
+  // getFestival() 返回 Festival 对象或 null
+  const lunarFestival = lunarDay.getFestival();
+  const solarFestival = solarDay.getFestival();
+  
+  const lunarFestivals = lunarFestival ? [lunarFestival.getName()] : [];
+  const solarFestivals = solarFestival ? [solarFestival.getName()] : [];
 
   return {
     ...base,
-    lunarYear: Number(safeCall(lunarDay, 'getLunarYear', 0)),
-    lunarMonth: Number(safeCall(lunarDay, 'getLunarMonth', 0)),
-    lunarDay: Number(safeCall(lunarDay, 'getLunarDay', 0)),
-    lunarMonthName: String(safeCall(lunarDay, 'getLunarMonthName', '')),
-    lunarDayName: String(safeCall(lunarDay, 'getLunarDayName', '')),
-    yearGanZhi: String(safeCall(lunarDay, 'getYearGanZhi', '')),
-    monthGanZhi: String(safeCall(lunarDay, 'getMonthGanZhi', '')),
-    dayGanZhi: rawDayGanZhi,
-    solarTerm: rawTerm,
-    lunarFestivals: Array.isArray(safeCall(lunarDay, 'getFestivals', []))
-      ? safeCall(lunarDay, 'getFestivals', [])
-      : [],
-    solarFestivals: Array.isArray(safeCall(lunarDay, 'getSolarFestivals', []))
-      ? safeCall(lunarDay, 'getSolarFestivals', [])
-      : [],
+    lunarYear: Number(numLunarYear),
+    lunarMonth: Number(numLunarMonth),
+    lunarDay: Number(numLunarDay),
+    lunarMonthName: String(lunarMonthName),
+    lunarDayName: String(lunarDayName),
+    yearGanZhi: String(yearGanZhi),
+    monthGanZhi: String(monthGanZhi),
+    dayGanZhi: String(dayGanZhi),
+    solarTerm: String(solarTermName),
+    lunarFestivals,
+    solarFestivals,
   };
 }
