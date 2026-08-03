@@ -29,6 +29,7 @@ jobs:
     container:
       image: node:24-slim
     env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       TZ: Asia/Shanghai
 
     steps:
@@ -47,8 +48,7 @@ jobs:
       - name: Get npm cache directory
         id: npm-cache
         shell: sh
-        run: |
-          echo "dir=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+        run: echo "dir=$(npm config get cache)" >> "$GITHUB_OUTPUT"
 
       - name: Cache npm dependencies
         uses: actions/cache@v5
@@ -64,10 +64,14 @@ jobs:
       - name: Build calendar
         run: npm run build
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+      # 使用 upload-artifact 代替 upload-pages-artifact, 在容器内仅做普通 artifact 上传，避免 finalize 404 错误
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
         with:
+          name: github-pages
           path: dist
+          retention-days: 1
+          if-no-files-found: error
 
   deploy:
     needs: build
@@ -76,6 +80,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # 在宿主机环境中下载并部署, deploy-pages 会自动处理 github-pages artifact 格式
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
