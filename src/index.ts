@@ -4,7 +4,7 @@ import { generatePage } from './page.js';
 
 async function main() {
   console.log('🚀 Start building the calendar...');
-  console.log(`时区: ${process.env.TZ || 'Asia/Shanghai'}`);
+  console.log(`Timezone: ${process.env.TZ || 'Asia/Shanghai'}`);
 
   await generateIcs('dist/calendar.ics');
   console.log('✅ ICS  file has been generated: dist/calendar.ics');
