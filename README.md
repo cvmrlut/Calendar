@@ -23,6 +23,11 @@
   ```
 
 # 内容模块化
+## 在.ics中每个历对应一个事件
+- 基础农历干支
+- 其它...
+
+## 文件
 ```
 .github\workflows\wf.yaml: GitHub_Action 配置文件(每月1日构建一次)
 src\
