@@ -59,21 +59,16 @@ export async function generateIcs(
         const nextParts = getTimeParts(nextDate, resolvedTz);
         const dtEnd = formatIcsDate(nextParts.year, nextParts.month, nextParts.day);
 
-        // 事件标题：优先节日/节气，否则显示农历
-        const summaryParts: string[] = [
-          ...info.solarFestivals,
-          ...info.lunarFestivals,
-          ...(info.solarTerm ? [info.solarTerm] : []),
-        ];
-        const summary = summaryParts.length > 0
-          ? summaryParts.join(' ')
-          : `农历${info.lunarMonthName}${info.lunarDayName}`;
+        // 事件标题：农历日期 + 月干支 + 日干支
+        const summary = `${info.lunarMonthName}${info.lunarDayName} ${info.yearGanZhi}年${info.monthGanZhi}月${info.dayGanZhi}日`;
 
-        // 描述：干支 + 农历（ICS 中换行需转义为 \n）
-        const description = [
-          `${info.yearGanZhi}年 ${info.monthGanZhi}月 ${info.dayGanZhi}日`,
-          `农历${info.lunarMonthName}${info.lunarDayName}`,
-        ].join('\\n');
+        // 描述：节气 + 公历节日 + 农历节日 + 年干支（空格拼接）
+        const descriptionParts: string[] = [
+          ...(info.solarTerm ? [info.solarTerm] : []),  // 节气（如“立春”）
+          ...info.lunarFestivals,                       // 农历节日（如“春节”）
+          ...info.solarFestivals,                       // 公历节日（如“元旦”）
+        ];
+        const description = descriptionParts.join('\\n');
 
         lines.push('BEGIN:VEVENT');
         lines.push(`UID:${dtStart}@calendar.refactor`);

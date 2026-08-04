@@ -44,6 +44,7 @@ src\
 - https://github.com/6tail?tab=repositories
   - 库选用 https://github.com/6tail/tyme4ts
   - 库文档 https://6tail.cn/tyme.html
+- https://github.com/sxwnl
 - https://github.com/oooldtoy/chinese_calender
 - https://github.com/infinet/lunar-calendar
 - https://github.com/OPN48/cnlunar
